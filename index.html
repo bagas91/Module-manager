@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Module Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #26262E;
+      color: #F87B01;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #1E1E24;
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: white;
+      font-size: 1em;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #F87B01;
+      border: none;
+      color: white;
+      font-size: 1em;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e06e00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛠 Module Manager</h1>
+    <input type="text" id="modName" placeholder="Nome do módulo (ex: movesBar)" />
+    <label><input type="checkbox" id="lua" checked /> .lua</label>
+    <label><input type="checkbox" id="otui" checked /> .otui</label>
+    <label><input type="checkbox" id="otmod" checked /> .otmod</label>
+    <button onclick="gerarModulo()">Gerar Módulo</button>
+  </div>
+
+  <script>
+    function gerarModulo() {
+      const nome = document.getElementById("modName").value.trim();
+      if (!nome) {
+        alert("Digite um nome para o módulo.");
+        return;
+      }
+
+      const zip = new JSZip();
+      const pasta = zip.folder(nome);
+
+      if (document.getElementById("lua").checked) {
+        pasta.file(`${nome}.lua`, `${nome} = {}\n\nfunction ${nome}.init()\n  -- Inicialização\nend\n\nfunction ${nome}.terminate()\n  -- Finalização\nend`);
+      }
+
+      if (document.getElementById("otui").checked) {
+        pasta.file(`${nome}.otui`, `MainWindow\n  id: ${nome}\n  size: 300 200\n  visible: false`);
+      }
+
+      if (document.getElementById("otmod").checked) {
+        pasta.file(`${nome}.otmod`, `Module\n  name: ${nome}\n  description: ${nome} module\n  author: B4GS\n  scripts: ${nome}.lua\n  @onLoad: ${nome}.init()\n  @onUnload: ${nome}.terminate()`);
+      }
+
+      zip.generateAsync({ type: "blob" }).then(blob => {
+        saveAs(blob, `${nome}_module.zip`);
+      });
+    }
+  </script>
+</body>
+</html>
